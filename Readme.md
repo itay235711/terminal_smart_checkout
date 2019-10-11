@@ -11,7 +11,7 @@ Install:
 
 Run:
 - from inside a git repository, run the main.rb script (it does'nt matter where it's located) - ```ruby /path/to/this/repo/main.rb```
-- I recommand giving this script an alias using .bashrc file or in any other way
+- I recommand giving this script an alias using .bashrc file or in any other way so it'll be easy to run everywhere
 
 Example print screen:
 ![alt text](https://raw.githubusercontent.com/itay235711/terminal_smart_checkout/master/screenshots/usage.png)
