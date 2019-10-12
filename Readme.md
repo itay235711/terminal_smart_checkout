@@ -1,4 +1,4 @@
-This repo allows you to checkout a local or a remote git branch even if you have lots of uncommitted changes. It does it by stashing, checking out and unstashing your local changes. It also provides a simple ui for selecting the branch and supports filtering by typing yhe search term.
+This repo allows you to checkout a local or a remote git branch even if you have lots of uncommitted changes. It does it by stashing, checking out and unstashing your local changes. It also provides a simple ui for selecting the branch and supports filtering by typing the search term.
 
 Requirements:
 - ruby installed
