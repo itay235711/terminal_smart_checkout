@@ -1,4 +1,4 @@
-This repo allows you to checkout a local or a remote branch even if you have lots of uncommitted changes.
+This repo allows you to checkout a local or a remote git branch even if you have lots of uncommitted changes.
 
 Requirements:
 - ruby installed
