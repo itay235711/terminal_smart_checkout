@@ -14,4 +14,4 @@ Run:
 - I recommand giving this script an alias using the .bashrc file or in any other way so it'll be easy to run everywhere
 
 Example print screen:
-![alt text](https://raw.githubusercontent.com/itay235711/terminal_smart_checkout/master/screenshots/usage.png)
+![alt text](https://raw.githubusercontent.com/itayL1/terminal_smart_checkout/master/screenshots/usage.png)
