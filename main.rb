@@ -6,7 +6,7 @@ require 'colorize'
 PROMPT = TTY::Prompt.new(interrupt: :exit)
 
 def main
-    local_branches = parse_git_branch_command_output(`git branch`)
+    local_branches = parse_git_branch_command_output(`git branch --sort=-committerdate`)
     remote_branches = parse_git_branch_command_output(`git branch -r`)
     selected_branch = ask_user_for_selected_branch(local_branches, remote_branches)
 
