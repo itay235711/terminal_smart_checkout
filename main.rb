@@ -3,6 +3,8 @@ require 'tty-prompt'
 require 'tty-command'
 require 'colorize'
 
+PROMPT = TTY::Prompt.new(interrupt: :exit)
+
 def main
     local_branches = parse_git_branch_command_output(`git branch`)
     remote_branches = parse_git_branch_command_output(`git branch -r`)
@@ -16,26 +18,31 @@ def main
             selected_branch.name
         end
 
-    smart_checkout(branch_name)
+    pull_aswell =
+        if selected_branch.is_remote?
+            false
+        else
+            PROMPT.yes?('do you want to pull as well?') {|q| q.default true}
+        end
+
+    smart_checkout(branch_name, pull_aswell)
 end
 
 def ask_user_for_selected_branch(local_branches, remote_branches)
-    prompt = TTY::Prompt.new(interrupt: :exit)
-
     local_branches_choises = local_branches.map do |branch|
-        { name: branch, value: GitBranch.new(branch, is_remote: false) }
+        { name: branch, value: GitBranch.new(branch, false) }
     end
 
     remote_branches_choises = remote_branches.reject do |branch|
         corsponding_local_branch = remove_remote_prefix(branch)
         local_branches.include? corsponding_local_branch
     end.map do |branch|
-        { name: branch, value: GitBranch.new(branch, is_remote: true) }
+        { name: branch, value: GitBranch.new(branch, true) }
     end
 
     all_choises = local_branches_choises + remote_branches_choises
     print_current_branch()
-    selected_branch = prompt.select(
+    selected_branch = PROMPT.select(
         "select a branch to switch too",
         all_choises,
         filter: true,
@@ -59,11 +66,12 @@ def parse_git_branch_command_output(command_output)
     end
 end
 
-def smart_checkout(branch_name)
+def smart_checkout(branch_name, pull_aswell)
     puts "smart checking out #{branch_name}"
 
     run_system_command_with_colored_output('git stash')
     run_system_command_with_colored_output("git checkout #{branch_name}")
+    run_system_command_with_colored_output("git pull") if pull_aswell
     run_system_command_with_colored_output('git stash pop')
 end
 
