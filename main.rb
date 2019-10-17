@@ -6,8 +6,13 @@ require 'colorize'
 PROMPT = TTY::Prompt.new(interrupt: :exit)
 
 def main
+    current_branch = `git rev-parse --abbrev-ref HEAD`.strip
+    puts "you are currently on branch #{current_branch.magenta}"
+
     local_branches = parse_git_branch_command_output(`git branch --sort=-committerdate`)
+    local_branches.delete(current_branch)
     remote_branches = parse_git_branch_command_output(`git branch -r`)
+
     selected_branch = ask_user_for_selected_branch(local_branches, remote_branches)
 
     branch_name =
@@ -41,7 +46,6 @@ def ask_user_for_selected_branch(local_branches, remote_branches)
     end
 
     all_choises = local_branches_choises + remote_branches_choises
-    print_current_branch()
     selected_branch = PROMPT.select(
         "select a branch to switch too",
         all_choises,
@@ -53,11 +57,6 @@ end
 
 def remove_remote_prefix(branch_name)
     branch_name.split('/')[-1]
-end
-
-def print_current_branch
-    current_branch = `git rev-parse --abbrev-ref HEAD`.strip
-    puts "you are currently on branch #{current_branch.magenta}"
 end
 
 def parse_git_branch_command_output(command_output)
