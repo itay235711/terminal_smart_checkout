@@ -68,10 +68,21 @@ end
 def smart_checkout(branch_name, pull_aswell)
     puts "smart checking out #{branch_name}"
 
-    run_system_command_with_colored_output('git stash')
+    git_wip_files_str = `git status -s`
+    uncomitted_changes_exist = git_wip_files_str != ''
+
+    if uncomitted_changes_exist
+        puts "### found uncomitted changes on current branch, stashing and unstashing them after checkout ###"
+        run_system_command_with_colored_output('git stash')
+    end
+
     run_system_command_with_colored_output("git checkout #{branch_name}")
+
     run_system_command_with_colored_output("git pull") if pull_aswell
-    run_system_command_with_colored_output('git stash pop')
+
+    if uncomitted_changes_exist
+        run_system_command_with_colored_output('git stash pop')
+    end
 end
 
 def run_system_command_with_colored_output(command)
