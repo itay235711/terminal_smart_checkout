@@ -78,6 +78,13 @@ def smart_checkout(branch_name, pull_aswell)
 
     run_system_command_with_colored_output("git checkout #{branch_name}")
 
+    # because I fucked up
+    begin
+        run_system_command_with_colored_output("git branch -u origin/#{branch_name}")
+    rescue
+        puts '*** WARANNING! git branch -u origin/#{branch_name} failed! ***'
+    end
+
     run_system_command_with_colored_output("git pull") if pull_aswell
 
     if uncomitted_changes_exist
