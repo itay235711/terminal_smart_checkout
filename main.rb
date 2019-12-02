@@ -7,13 +7,11 @@ PROMPT = TTY::Prompt.new(interrupt: :exit)
 
 def main
     current_branch = `git rev-parse --abbrev-ref HEAD`.strip
-    puts "you are currently on branch #{current_branch.magenta}"
 
     local_branches = parse_git_branch_command_output(`git branch --sort=-committerdate`)
-    local_branches.delete(current_branch)
     remote_branches = parse_git_branch_command_output(`git branch -r`)
 
-    selected_branch = ask_user_for_selected_branch(local_branches, remote_branches)
+    selected_branch = ask_user_for_selected_branch(local_branches, remote_branches, current_branch)
 
     branch_name =
         if selected_branch.is_remote?
@@ -27,15 +25,20 @@ def main
         if selected_branch.is_remote?
             false
         else
-            PROMPT.yes?('do you want to pull as well?') {|q| q.default true}
+            PROMPT.yes?('do you want to pull as well?', value: 'n')
         end
 
     smart_checkout(branch_name, pull_aswell)
 end
 
-def ask_user_for_selected_branch(local_branches, remote_branches)
+def ask_user_for_selected_branch(local_branches, remote_branches, current_branch)
     local_branches_choises = local_branches.map do |branch|
-        { name: branch, value: GitBranch.new(branch, false) }
+        foramtted_choice = { name: branch, value: GitBranch.new(branch, false) }
+        if branch == current_branch
+            foramtted_choice[:disabled] = '(current branch)'.magenta
+            foramtted_choice[:name] = foramtted_choice[:name].magenta
+        end
+        foramtted_choice
     end
 
     remote_branches_choises = remote_branches.reject do |branch|
@@ -82,7 +85,7 @@ def smart_checkout(branch_name, pull_aswell)
     begin
         run_system_command_with_colored_output("git branch -u origin/#{branch_name}")
     rescue
-        puts '*** WARANNING! git branch -u origin/#{branch_name} failed! ***'
+        puts '*** WARANNING! git branch -u origin/#{branch_name} failed! (but it was rescued) ***'
     end
 
     run_system_command_with_colored_output("git pull") if pull_aswell
