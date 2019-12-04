@@ -21,14 +21,9 @@ def main
             selected_branch.name
         end
 
-    pull_aswell =
-        if selected_branch.is_remote?
-            false
-        else
-            PROMPT.yes?('do you want to pull as well?', value: 'n')
-        end
+    post_checkout_operations = ask_user_which_post_checkout_operations_to_perform(selected_branch)
 
-    smart_checkout(branch_name, pull_aswell)
+    smart_checkout(branch_name, post_checkout_operations)
 end
 
 def ask_user_for_selected_branch(local_branches, remote_branches, current_branch)
@@ -58,6 +53,19 @@ def ask_user_for_selected_branch(local_branches, remote_branches, current_branch
     selected_branch
 end
 
+def ask_user_which_post_checkout_operations_to_perform(selected_branch)
+    if selected_branch.is_remote?
+        { perform_pull: false, perform_migrations: false }
+    else
+        PROMPT.select('do you want to pull / run migrations as well?', [
+            { name: 'do nothing', value: { perform_pull: false, perform_migrations: false } },
+            { name: 'pull and run migrations', value: { perform_pull: true, perform_migrations: true } },
+            { name: "pull but don't run migrations", value: { perform_pull: true, perform_migrations: false } },
+            { name: "don't pull but run migrations", value: { perform_pull: false, perform_migrations: true } }
+        ])
+    end
+end
+
 def remove_remote_prefix(branch_name)
     branch_name.split('/')[-1]
 end
@@ -68,7 +76,7 @@ def parse_git_branch_command_output(command_output)
     end
 end
 
-def smart_checkout(branch_name, pull_aswell)
+def smart_checkout(branch_name, post_checkout_operations)
     puts "smart checking out #{branch_name}"
 
     git_wip_files_str = `git status -s`
@@ -79,27 +87,40 @@ def smart_checkout(branch_name, pull_aswell)
         run_system_command_with_colored_output('git stash')
     end
 
-    run_system_command_with_colored_output("git checkout #{branch_name}")
-
-    # because I fucked up
     begin
-        run_system_command_with_colored_output("git branch -u origin/#{branch_name}")
-    rescue
-        puts '*** WARANNING! git branch -u origin/#{branch_name} failed! (but it was rescued) ***'
-    end
+        run_system_command_with_colored_output("git checkout #{branch_name}")
 
-    run_system_command_with_colored_output("git pull") if pull_aswell
+        # because I fucked up
+        begin
+            run_system_command_with_colored_output("git branch -u origin/#{branch_name}")
+        rescue
+            puts '*** WARANNING! git branch -u origin/#{branch_name} failed! (but it was rescued) ***'
+        end
 
-    if uncomitted_changes_exist
-        run_system_command_with_colored_output('git stash pop')
+        run_system_command_with_colored_output("git pull") if post_checkout_operations[:perform_pull]
+        run_system_command_with_colored_output("./migrator.py migrate", 'migrations') if post_checkout_operations[:perform_migrations]
+    ensure
+        if uncomitted_changes_exist
+            run_system_command_with_colored_output('git stash pop')
+        end
     end
 end
 
-def run_system_command_with_colored_output(command)
+def run_system_command_with_colored_output(command, specific_inner_working_directory=nil)
     cmd = TTY::Command.new(pty: true, verbose: false)
     splitted_command = command.split(' ')
 
-    cmd.run(*splitted_command)
+    unless specific_inner_working_directory
+        cmd.run(*splitted_command)
+    else
+        previous_dir = Dir.pwd
+        puts "File.join(previous_dir, specific_inner_working_directory): #{File.join(previous_dir, specific_inner_working_directory)}"
+        Dir.chdir(File.join(previous_dir, specific_inner_working_directory))
+
+        cmd.run(*splitted_command)
+
+        Dir.chdir(previous_dir)
+    end
 end
 
 class GitBranch
