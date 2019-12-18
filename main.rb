@@ -58,10 +58,13 @@ def ask_user_which_post_checkout_operations_to_perform(selected_branch)
         { perform_pull: false, perform_migrations: false }
     else
         PROMPT.select('do you want to pull / run migrations as well?', [
-            { name: 'do nothing', value: { perform_pull: false, perform_migrations: false } },
-            { name: 'pull and run migrations', value: { perform_pull: true, perform_migrations: true } },
-            { name: "pull but don't run migrations", value: { perform_pull: true, perform_migrations: false } },
-            { name: "don't pull but run migrations", value: { perform_pull: false, perform_migrations: true } }
+            { name: 'do nothing', value: { perform_pull: false, perform_migrations: false, perform_rebase_onto_origin_master: false } },
+            { name: 'pull and run migrations', value: { perform_pull: true, perform_migrations: true, perform_rebase_onto_origin_master: false } },
+            { name: 'pull, run migrations and rebase onto origin/master', value: { perform_pull: true, perform_migrations: true, perform_rebase_onto_origin_master: true } },
+            { name: "pull and rebase onto origin/master", value: { perform_pull: true, perform_migrations: false, perform_rebase_onto_origin_master: true } },
+            { name: "rebase onto origin/master only", value: { perform_pull: false, perform_migrations: false, perform_rebase_onto_origin_master: true } },
+            { name: "pull only", value: { perform_pull: true, perform_migrations: false, perform_rebase_onto_origin_master: false } },
+            { name: "run migrations only", value: { perform_pull: false, perform_migrations: true, perform_rebase_onto_origin_master: false } }
         ])
     end
 end
@@ -99,6 +102,7 @@ def smart_checkout(branch_name, post_checkout_operations)
 
         run_system_command_with_colored_output("git pull") if post_checkout_operations[:perform_pull]
         run_system_command_with_colored_output("./migrator.py migrate", 'migrations') if post_checkout_operations[:perform_migrations]
+        run_system_command_with_colored_output("git rebase origin/master") if post_checkout_operations[:perform_rebase_onto_origin_master]
     ensure
         if uncomitted_changes_exist
             run_system_command_with_colored_output('git stash pop')
