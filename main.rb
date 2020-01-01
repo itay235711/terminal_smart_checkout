@@ -25,7 +25,12 @@ def main
     should_run_update_sh = ask_user_if_should_run_main_update_sh_script()
     post_checkout_operations[:should_run_update_sh] = should_run_update_sh
 
-    smart_checkout(branch_name, post_checkout_operations)
+    begin
+        smart_checkout(branch_name, post_checkout_operations)
+        puts "SUCCEEDED".black.on_green
+    rescue
+        puts "FAILED".on_red
+    end
 end
 
 def ask_user_for_selected_branch(local_branches, remote_branches, current_branch)
