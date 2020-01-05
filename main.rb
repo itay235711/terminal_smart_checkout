@@ -73,7 +73,7 @@ def ask_user_which_post_checkout_operations_to_perform()
 end
 
 def ask_user_if_should_run_main_update_sh_script()
-    PROMPT.yes?('do you want to run ./update_server_only_plus_migrations.sh?', value: 'n')
+    PROMPT.yes?('do you want to run update_server_only_plus_migrations.sh?', value: 'n')
 end
 
 def remove_remote_prefix(branch_name)
@@ -111,7 +111,7 @@ def smart_checkout(branch_name, post_checkout_operations)
         run_system_command_with_colored_output("./migrator.py migrate", 'migrations') if post_checkout_operations[:perform_migrations]
         run_system_command_with_colored_output("git rebase origin/master") if post_checkout_operations[:perform_rebase_onto_origin_master]
         if post_checkout_operations[:should_run_update_sh]
-            run_system_command_with_colored_output("./scripts/update_server_only_plus_migrations.sh")
+            run_system_command_with_colored_output("./usefull_scripts/git/update_server_only_plus_migrations.sh")
             run_system_command_with_colored_output("git reset --hard HEAD") # we don't need the shit left over update.sh
         end
     ensure
