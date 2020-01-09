@@ -64,10 +64,10 @@ def ask_user_which_post_checkout_operations_to_perform()
     PROMPT.select('do you want to pull / run migrations as well?', [
         { name: 'do nothing', value: { perform_pull: false, perform_migrations: false, perform_rebase_onto_origin_master: false } },
         { name: 'pull and run migrations', value: { perform_pull: true, perform_migrations: true, perform_rebase_onto_origin_master: false } },
+        { name: "rebase onto origin/master only", value: { perform_pull: false, perform_migrations: false, perform_rebase_onto_origin_master: true } },
         { name: "pull only", value: { perform_pull: true, perform_migrations: false, perform_rebase_onto_origin_master: false } },
         { name: 'pull, run migrations and rebase onto origin/master', value: { perform_pull: true, perform_migrations: true, perform_rebase_onto_origin_master: true } },
         { name: "pull and rebase onto origin/master", value: { perform_pull: true, perform_migrations: false, perform_rebase_onto_origin_master: true } },
-        { name: "rebase onto origin/master only", value: { perform_pull: false, perform_migrations: false, perform_rebase_onto_origin_master: true } },
         { name: "run migrations only", value: { perform_pull: false, perform_migrations: true, perform_rebase_onto_origin_master: false } }
     ], per_page: 10)
 end
