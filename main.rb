@@ -107,7 +107,7 @@ def smart_checkout(branch_name, post_checkout_operations)
             puts '*** WARANNING! git branch -u origin/#{branch_name} failed! (but it was rescued) ***'
         end
 
-        run_system_command_with_colored_output("git pull") if post_checkout_operations[:perform_pull]
+        run_system_command_with_colored_output("git pull --rebase") if post_checkout_operations[:perform_pull]
         run_system_command_with_colored_output("./migrator.py migrate", 'migrations') if post_checkout_operations[:perform_migrations]
         run_system_command_with_colored_output("git rebase origin/master") if post_checkout_operations[:perform_rebase_onto_origin_master]
         if post_checkout_operations[:should_run_update_sh]
